@@ -47,7 +47,7 @@ public partial class CreatePackWindow : Window
 			return;
 		}
 		Utils.Card card = (Utils.Card)((Control)sender).DataContext!;
-		hoveredTextBox.Text = card.desc;
+		// hoveredTextBox.Text = card.desc;
 		foreach(string ending in Utils.ENDINGS)
 		{
 			string imagePathText = Path.Combine(Program.config.image_path, $"{card.id}{ending}");

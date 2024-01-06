@@ -12,6 +12,6 @@
 		<ListBox Grid.Column="1" Grid.Row="1" x:Name="allCardsBox"/>
 		<ListBox Grid.Column="2" Grid.Row="1" x:Name="packBox"/>
 		<Image Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" x:Name="hoveredImageBox"/>
-		<TextBlock Grid.Column="3" Grid.Row="2" x:Name="hoveredTextBox"/>
+		<!-- <TextBlock Grid.Column="3" Grid.Row="2" x:Name="hoveredTextBox"/> -->
 	</Grid>
 </Window>
