@@ -46,18 +46,14 @@ class Program
 		{
 			if(Path.GetExtension(fileText) == ".cdb")
 			{
-				using(SqliteConnection connection = new($"Data Source={fileText}"))
+				using SqliteConnection connection = new($"Data Source={fileText}");
+				connection.Open();
+				SqliteCommand command = connection.CreateCommand();
+				command.CommandText = "SELECT datas.id, texts.name, texts.desc FROM datas, texts WHERE datas.id = texts.id AND (datas.ot <= 3 OR datas.ot = 32) AND NOT texts.name LIKE '% Token'";
+				using SqliteDataReader reader = command.ExecuteReader();
+				while(reader.Read())
 				{
-					connection.Open();
-					SqliteCommand command = connection.CreateCommand();
-					command.CommandText = "SELECT datas.id, texts.name, texts.desc FROM datas, texts WHERE datas.id = texts.id AND (datas.ot <= 3 OR datas.ot = 32) AND NOT texts.name LIKE '% Token'";
-					using(SqliteDataReader reader = command.ExecuteReader())
-					{
-						while(reader.Read())
-						{
-							allCards.Add(new(id: reader.GetInt32(0), name: reader.GetString(1), desc: reader.GetString(2)));
-						}
-					}
+					allCards.Add(new(id: reader.GetInt32(0), name: reader.GetString(1), desc: reader.GetString(2)));
 				}
 			}
 		}

@@ -5,13 +5,19 @@
 		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
 		x:Class="YugiohPackSimulator.CreatePackWindow"
 		Title="CreatePackWindow">
-	<Grid ColumnDefinitions="100,*,*,*"
-			RowDefinitions="Auto,*">
+	<Grid ColumnDefinitions="100,*,*,*,Auto,Auto"
+			RowDefinitions="Auto,Auto,*">
 		<Button Grid.Column="0" Grid.Row="0" Click="BackClick">Back</Button>
 		<TextBox Grid.Column="1" Grid.Row="0" KeyUp="InputKeyUp"/>
-		<ListBox Grid.Column="1" Grid.Row="1" x:Name="allCardsBox"/>
-		<ListBox Grid.Column="2" Grid.Row="1" x:Name="packBox"/>
-		<Image Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" x:Name="hoveredImageBox"/>
+		<ListBox Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" x:Name="allCardsBox" SelectionChanged="AllCardsSelectionChanged"/>
+		<ListBox Grid.Column="2" Grid.Row="1" Grid.RowSpan="2" x:Name="packBox" SelectionChanged="PackSelectionChanged"/>
+		<Image Grid.Column="3" Grid.Row="0" Grid.RowSpan="3" x:Name="hoveredImageBox"/>
+		<Button Grid.Column="4" Grid.Row="0" Click="SaveClick">Save</Button>
+		<ListBox Grid.Column="4" Grid.Row="1" x:Name="raritiesPanel"/>
+		<Button Grid.Column="4" Grid.Row="2" Click="AddRarityClick">Add rarity</Button>
+		<Button Grid.Column="5" Grid.Row="0" Click="LoadClick">Load</Button>
+		<ListBox Grid.Column="5" Grid.Row="1" x:Name="packLayoutPanel"/>
+		<Button Grid.Column="5" Grid.Row="2" Click="AddLayoutSlotClick">Add slot</Button>
 		<!-- <TextBlock Grid.Column="3" Grid.Row="2" x:Name="hoveredTextBox"/> -->
 	</Grid>
 </Window>
