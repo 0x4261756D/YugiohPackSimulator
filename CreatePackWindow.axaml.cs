@@ -199,13 +199,16 @@ public partial class CreatePackWindow : Window
 		{
 			return;
 		}
-		packBox.Items.Clear();
 		Utils.Pack pack = JsonSerializer.Deserialize<Utils.Pack>(File.ReadAllBytes(path), Utils.jsonIncludeOption)!;
-		packBox.ItemsSource = Array.ConvertAll(pack.cards, (card) => new TextBlock
+		packBox.Items.Clear();
+		foreach(Utils.Card card in pack.cards)
 		{
-			Text = card.name,
-			DataContext = card,
-		});
+			packBox.Items.Add(new TextBlock
+			{
+				Text = card.name,
+				DataContext = card,
+			});
+		}
 		foreach(string rarity in pack.rarities)
 		{
 			AddRarity(rarity);
