@@ -1,17 +1,16 @@
 using System;
-using Avalonia.Media.Imaging;
+using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using System.Threading.Tasks;
-using System.Net.Http;
-using Avalonia.Threading;
-using System.Net;
-using System.Collections.Generic;
 using Avalonia.Layout;
-using System.Text.Json;
-using System.Collections.Immutable;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 
 namespace YugiohPackSimulator;
 
