@@ -188,6 +188,7 @@ public partial class CreatePackWindow : Window
 		{
 			return;
 		}
+		packBox.Items.Clear();
 		Utils.Pack pack = JsonSerializer.Deserialize<Utils.Pack>(File.ReadAllBytes(path), Utils.jsonIncludeOption)!;
 		packBox.ItemsSource = Array.ConvertAll(pack.cards, (card) => new TextBlock
 		{
