@@ -3,3 +3,4 @@ pics/
 bin/
 obj/
 config.json
+release/
