@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		x:Class="YugiohPackSimulator.SimulationWindow"
+		Title="SimulationWindow">
+	<Grid ColumnDefinitions="100,*,*"
+			RowDefinitions="Auto,Auto,*">
+		<Button Grid.Column="0" Grid.Row="0" Click="BackClick">Back</Button>
+		<WrapPanel Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" x:Name="packPanel"/>
+		<Button Grid.Column="2" Grid.Row="1" Click="ShowAllClick">Show All</Button>
+		<TextBlock Grid.Column="0" Grid.Row="1" x:Name="progressBlock"/>
+		<Button Grid.Column="1" Grid.Row="2" Click="NextClick" x:Name="nextButton">Next</Button>
+	</Grid>
+</Window>

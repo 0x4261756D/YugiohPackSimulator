@@ -1,9 +1,13 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 
 namespace YugiohPackSimulator;
 
@@ -62,13 +66,13 @@ public class Utils
 		return null;
 	}
 
-	public static async Task SaveFileAtSelectedLocationAsync(byte[] content, Window window, string title = "Select file")
+	public static async Task SaveFileAtSelectedLocationAsync(byte[] content, Window window, string defaultExtension, string title = "Select file")
 	{
 		TopLevel? topLevel = TopLevel.GetTopLevel(window);
 		if(topLevel == null) return;
 		IStorageFile? file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
 		{
-			DefaultExtension = "json",
+			DefaultExtension = defaultExtension,
 			ShowOverwritePrompt = true,
 			Title = title
 		});
@@ -78,6 +82,37 @@ public class Utils
 		}
 		using Stream stream = await file.OpenWriteAsync();
 		await stream.WriteAsync(buffer: content);
+	}
+	public static void ShowCard(Image hoveredImageBox, Utils.Card card)
+	{
+		foreach(string ending in Utils.ENDINGS)
+		{
+			string imagePathText = Path.Combine(Program.config.image_path, $"{card.id}{ending}");
+			if(File.Exists(imagePathText))
+			{
+				hoveredImageBox.Source = new Bitmap(imagePathText);
+				return;
+			}
+		}
+		foreach(string ending in Utils.ENDINGS)
+		{
+			string imagePathText = Path.Combine(Program.config.image_path, $"{card.id}{ending}");
+			hoveredImageBox.Source = null;
+			Task.Run(async () =>
+			{
+				using HttpClient client = new();
+				foreach(string baseUrl in Program.config.image_urls)
+				{
+					string url = $"{baseUrl}{card.id}{ending}";
+					HttpResponseMessage response = await client.GetAsync(url);
+					if(response.StatusCode == HttpStatusCode.OK)
+					{
+						await File.WriteAllBytesAsync(imagePathText, await response.Content.ReadAsByteArrayAsync());
+						await Dispatcher.UIThread.InvokeAsync(() => hoveredImageBox.Source = new Bitmap(imagePathText));
+					}
+				}
+			});
+		}
 	}
 
 }

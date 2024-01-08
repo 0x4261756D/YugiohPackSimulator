@@ -1,4 +1,3 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
@@ -16,6 +15,11 @@ public partial class MainWindow : Window
 	public void ToCreatePackClick(object? sender, RoutedEventArgs args)
 	{
 		new CreatePackWindow().Show();
+		Close();
+	}
+	public void ToConfigSimulationClick(object? sender, RoutedEventArgs args)
+	{
+		new ConfigSimulationWindow().Show();
 		Close();
 	}
 }

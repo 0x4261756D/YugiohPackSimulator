@@ -1,16 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
-using Avalonia.Media.Imaging;
-using Avalonia.Threading;
 
 namespace YugiohPackSimulator;
 
@@ -115,7 +110,7 @@ public partial class CreatePackWindow : Window
 			{
 				Text = card.name
 			};
-			nameBlock.PointerEntered += (_, _) => ShowCard(hoveredImageBox, card);
+			nameBlock.PointerEntered += (_, _) => Utils.ShowCard(hoveredImageBox, card);
 			Children.Add(nameBlock);
 			rarityBox = new()
 			{
@@ -123,37 +118,6 @@ public partial class CreatePackWindow : Window
 				Text = card.rarityIndex < rarities.Length ? rarities[card.rarityIndex] : null
 			};
 			Children.Add(rarityBox);
-		}
-	}
-	private static void ShowCard(Image hoveredImageBox, Utils.Card card)
-	{
-		foreach(string ending in Utils.ENDINGS)
-		{
-			string imagePathText = Path.Combine(Program.config.image_path, $"{card.id}{ending}");
-			if(File.Exists(imagePathText))
-			{
-				hoveredImageBox.Source = new Bitmap(imagePathText);
-				return;
-			}
-		}
-		foreach(string ending in Utils.ENDINGS)
-		{
-			string imagePathText = Path.Combine(Program.config.image_path, $"{card.id}{ending}");
-			hoveredImageBox.Source = null;
-			Task.Run(async () =>
-			{
-				using HttpClient client = new();
-				foreach(string baseUrl in Program.config.image_urls)
-				{
-					string url = $"{baseUrl}{card.id}{ending}";
-					HttpResponseMessage response = await client.GetAsync(url);
-					if(response.StatusCode == HttpStatusCode.OK)
-					{
-						await File.WriteAllBytesAsync(imagePathText, await response.Content.ReadAsByteArrayAsync());
-						await Dispatcher.UIThread.InvokeAsync(() => hoveredImageBox.Source = new Bitmap(imagePathText));
-					}
-				}
-			});
 		}
 	}
 
@@ -176,7 +140,7 @@ public partial class CreatePackWindow : Window
 					DataContext = card,
 					Text = card.name,
 				};
-				block.PointerEntered += (_, _) => ShowCard(hoveredImageBox, card);
+				block.PointerEntered += (_, _) => Utils.ShowCard(hoveredImageBox, card);
 				items.Add(block);
 			}
 		}
@@ -275,7 +239,7 @@ public partial class CreatePackWindow : Window
 				secondaryRarityFrequency: (int)p.secondaryFrequencyBox.Value!);
 		}
 		Utils.Pack pack = new(cards: cards, rarities: rarities, slots: slots);
-		await Utils.SaveFileAtSelectedLocationAsync(JsonSerializer.SerializeToUtf8Bytes(pack, Utils.jsonPrettyOption), this);
+		await Utils.SaveFileAtSelectedLocationAsync(JsonSerializer.SerializeToUtf8Bytes(pack, Utils.jsonPrettyOption), this, defaultExtension: "json");
 	}
 
 	public void AllCardsSelectionChanged(object? sender, SelectionChangedEventArgs args)
@@ -289,7 +253,7 @@ public partial class CreatePackWindow : Window
 		allCardsBox.SelectedItem = null;
 		foreach(object? c in packBox.Items)
 		{
-			if(c != null && ((TextBlock)c).Text == block.Text)
+			if(c != null && ((PackCardPanel)c).nameBlock.Text == block.Text)
 			{
 				return;
 			}

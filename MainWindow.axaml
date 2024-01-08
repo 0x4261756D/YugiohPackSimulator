@@ -9,6 +9,9 @@
 		<Button Click="ToCreatePackClick">
 			Create Pack
 		</Button>
+		<Button Click="ToConfigSimulationClick">
+			Start Simulation
+		</Button>
 		<StackPanel Orientation="Horizontal">
 			<TextBlock Margin="10">Image Url:</TextBlock>
 			<TextBox x:Name="imageUrlBox"/>

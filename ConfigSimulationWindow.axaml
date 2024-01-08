@@ -1,0 +1,20 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		x:Class="YugiohPackSimulator.ConfigSimulationWindow"
+		Title="ConfigSimulationWindow">
+	<StackPanel>
+		<Button Click="BackClick">Back</Button>
+		<StackPanel Orientation="Horizontal">
+			<TextBox x:Name="pathBox" Watermark="Path"/>
+			<Button Click="SelectPackClick">Select Pack</Button>
+		</StackPanel>
+		<StackPanel>
+			<TextBlock>Amount of packs:</TextBlock>
+			<NumericUpDown Minimum="1" Value="3" FormatString="0" x:Name="amountBox"/>
+		</StackPanel>
+		<Button Click="StartClick">Start</Button>
+	</StackPanel>
+</Window>

@@ -1,17 +1,17 @@
-﻿using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Microsoft.Data.Sqlite;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Microsoft.Data.Sqlite;
 
 namespace YugiohPackSimulator;
 
 class Program
 {
-	public static Utils.Config config = new("UNDEFINED", new(), "UNDEFINED");
-	public static List<Utils.Card> allCards = new();
+	public static Utils.Config config = new("UNDEFINED", [], "UNDEFINED");
+	public static List<Utils.Card> allCards = [];
 
 	// Initialization code. Don't use any Avalonia, third-party APIs or any
 	// SynchronizationContext-reliant code before AppMain is called: things aren't initialized
