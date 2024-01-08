@@ -16,6 +16,90 @@ namespace YugiohPackSimulator;
 
 public partial class CreatePackWindow : Window
 {
+	private class LayoutSlotPanel : StackPanel
+	{
+		public ComboBox primaryRarityBox, secondaryRarityBox;
+		public NumericUpDown secondaryFrequencyBox;
+		public Button removeButton;
+
+		public LayoutSlotPanel(ListBox raritiesPanel, int primaryRarityIndex, int secondaryRarityIndex, int secondaryFrequency)
+		{
+			Orientation = Orientation.Horizontal;
+			string[] rarities = new string[raritiesPanel.ItemCount];
+			for(int i = 0; i < rarities.Length; i++)
+			{
+				Control c = (Control)raritiesPanel.Items[i]!;
+				rarities[i] = ((TextBox)((StackPanel)c).Children[0]).Text!;
+			}
+			primaryRarityBox = new()
+			{
+				ItemsSource = rarities,
+				SelectedIndex = primaryRarityIndex,
+			};
+			Children.Add(primaryRarityBox);
+			secondaryRarityBox = new()
+			{
+				ItemsSource = rarities,
+				SelectedIndex = secondaryRarityIndex,
+			};
+			Children.Add(secondaryRarityBox);
+			secondaryFrequencyBox = new()
+			{
+				Text = "1 in X has the secondary rare",
+				Minimum = 0,
+				Value = secondaryFrequency,
+				FormatString = "0"
+			};
+			Children.Add(secondaryFrequencyBox);
+			removeButton = new()
+			{
+				Content = "-",
+			};
+			removeButton.Click += (_, _) =>
+			{
+				((Panel)Parent!).Children.Remove(this);
+			};
+		}
+	}
+	private class RarityPanel : StackPanel
+	{
+		public TextBox nameBox;
+		public Button removeButton;
+
+		public RarityPanel(string text, ListBox packLayoutPanel)
+		{
+			Orientation = Orientation.Horizontal;
+			nameBox = new()
+			{
+				Watermark = "Name",
+				Text = text,
+			};
+			Children.Add(nameBox);
+			removeButton = new()
+			{
+				Content = "-",
+			};
+			removeButton.Click += (_, _) =>
+			{
+				((ListBox)Parent!).Items.Remove(this);
+				for(int i = packLayoutPanel.ItemCount - 1; i >= 0; i--)
+				{
+					LayoutSlotPanel layoutSlot = (LayoutSlotPanel)packLayoutPanel.Items[i]!;
+					string primaryRarity = (string)layoutSlot.primaryRarityBox.SelectedValue!;
+					string secondaryRarity = (string)layoutSlot.secondaryRarityBox.SelectedValue!;
+					if(primaryRarity == nameBox.Text)
+					{
+						packLayoutPanel.Items.RemoveAt(i);
+					}
+					else if(secondaryRarity == nameBox.Text)
+					{
+						packLayoutPanel.Items.RemoveAt(i);
+					}
+				}
+			};
+		}
+	}
+
 	public CreatePackWindow()
 	{
 		InitializeComponent();
@@ -90,42 +174,9 @@ public partial class CreatePackWindow : Window
 	{
 		AddRarity("");
 	}
-
 	private void AddRarity(string text)
 	{
-		StackPanel panel = new()
-		{
-			Orientation = Orientation.Horizontal,
-		};
-		TextBox nameBox = new()
-		{
-			Watermark = "Name",
-			Text = text,
-		};
-		panel.Children.Add(nameBox);
-		Button removeButton = new()
-		{
-			Content = "-",
-		};
-		removeButton.Click += (_, _) =>
-		{
-			raritiesPanel.Items.Remove(panel);
-			for(int i = packLayoutPanel.ItemCount - 1; i >= 0; i--)
-			{
-				string primaryRarity = (string)((ComboBox)((StackPanel)packLayoutPanel.Items[i]!).Children[0]).SelectedValue!;
-				string secondaryRarity = (string)((ComboBox)((StackPanel)packLayoutPanel.Items[i]!).Children[1]).SelectedValue!;
-				if(primaryRarity == nameBox.Text)
-				{
-					packLayoutPanel.Items.RemoveAt(i);
-				}
-				else if(secondaryRarity == nameBox.Text)
-				{
-					packLayoutPanel.Items.RemoveAt(i);
-				}
-			}
-		};
-		panel.Children.Add(removeButton);
-		raritiesPanel.Items.Insert(0, panel);
+		raritiesPanel.Items.Insert(0, new RarityPanel(text, packLayoutPanel));
 	}
 
 	public void AddLayoutSlotClick(object? sender, RoutedEventArgs args)
@@ -138,46 +189,7 @@ public partial class CreatePackWindow : Window
 		{
 			return;
 		}
-		StackPanel panel = new()
-		{
-			Orientation = Orientation.Horizontal,
-		};
-		string[] rarities = new string[raritiesPanel.ItemCount];
-		for(int i = 0; i < rarities.Length; i++)
-		{
-			Control c = (Control)raritiesPanel.Items[i]!;
-			rarities[i] = ((TextBox)((StackPanel)c).Children[0]).Text!;
-		}
-		ComboBox primaryRarityBox = new()
-		{
-			ItemsSource = rarities,
-			SelectedIndex = primaryRarityIndex,
-		};
-		panel.Children.Add(primaryRarityBox);
-		ComboBox secondaryRarityBox = new()
-		{
-			ItemsSource = rarities,
-			SelectedIndex = secondaryRarityIndex,
-		};
-		panel.Children.Add(secondaryRarityBox);
-		NumericUpDown secondaryFrequencyBox = new()
-		{
-			Text = "1 in X has the secondary rare",
-			Minimum = 0,
-			Value = secondaryFrequency,
-			FormatString = "0"
-		};
-		panel.Children.Add(secondaryFrequencyBox);
-		Button removeButton = new()
-		{
-			Content = "-",
-		};
-		removeButton.Click += (_, _) =>
-		{
-			packLayoutPanel.Items.Remove(panel);
-		};
-		panel.Children.Add(removeButton);
-		packLayoutPanel.Items.Insert(0, panel);
+		packLayoutPanel.Items.Insert(0, new LayoutSlotPanel(raritiesPanel, primaryRarityIndex: primaryRarityIndex, secondaryFrequency: secondaryFrequency, secondaryRarityIndex: secondaryRarityIndex));
 	}
 
 	public async void LoadClick(object? sender, RoutedEventArgs args)
@@ -226,17 +238,17 @@ public partial class CreatePackWindow : Window
 		Dictionary<string, int> rarityIndices = [];
 		for(int i = 0; i < rarities.Length; i++)
 		{
-			rarities[i] = ((TextBox)((StackPanel)raritiesPanel.Items[i]!).Children[0]).Text!;
+			rarities[i] = ((RarityPanel)raritiesPanel.Items[i]!).nameBox.Text!;
 			rarityIndices[rarities[i]] = i;
 		}
 		Utils.Slot[] slots = new Utils.Slot[packLayoutPanel.ItemCount];
 		for(int i = 0; i < slots.Length; i++)
 		{
-			StackPanel p = (StackPanel)packLayoutPanel.Items[i]!;
+			LayoutSlotPanel p = (LayoutSlotPanel)packLayoutPanel.Items[i]!;
 			slots[i] = new(
-				primaryRarityIndex: rarityIndices[(string)((ComboBox)p.Children[0]).SelectedValue!],
-				secondaryRarityIndex: rarityIndices[(string)((ComboBox)p.Children[1]).SelectedValue!],
-				secondaryRarityFrequency: (int)((NumericUpDown)p.Children[2]).Value!);
+				primaryRarityIndex: rarityIndices[(string)p.primaryRarityBox.SelectedValue!],
+				secondaryRarityIndex: rarityIndices[(string)p.secondaryRarityBox.SelectedValue!],
+				secondaryRarityFrequency: (int)p.secondaryFrequencyBox.Value!);
 		}
 		Utils.Pack pack = new(cards: cards, rarities: rarities, slots: slots);
 		await Utils.SaveFileAtSelectedLocationAsync(JsonSerializer.SerializeToUtf8Bytes(pack, Utils.jsonPrettyOption), this);
@@ -266,7 +278,7 @@ public partial class CreatePackWindow : Window
 	}
 
 	public void PackSelectionChanged(object? sender, SelectionChangedEventArgs args)
-	{		
+	{
 		if(args.AddedItems.Count != 1 || args.RemovedItems.Count != 0)
 		{
 			return;
