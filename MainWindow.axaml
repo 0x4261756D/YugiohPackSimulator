@@ -14,7 +14,7 @@
 		</Button>
 		<StackPanel Orientation="Horizontal">
 			<TextBlock Margin="10">Image Url:</TextBlock>
-			<TextBox x:Name="imageUrlBox"/>
+			<TextBox x:Name="imageUrlBox" AcceptsReturn="True"/>
 		</StackPanel>
 		<StackPanel Orientation="Horizontal">
 			<TextBlock Margin="10">Image Path:</TextBlock>
