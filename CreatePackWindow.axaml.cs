@@ -59,6 +59,7 @@ public partial class CreatePackWindow : Window
 			{
 				((Panel)Parent!).Children.Remove(this);
 			};
+			Children.Add(removeButton);
 		}
 	}
 	private class RarityPanel : StackPanel
@@ -97,43 +98,35 @@ public partial class CreatePackWindow : Window
 					}
 				}
 			};
+			Children.Add(removeButton);
 		}
 	}
-
-	public CreatePackWindow()
+	private class PackCardPanel : StackPanel
 	{
-		InitializeComponent();
-		FilterCards("");
-	}
+		public TextBlock nameBlock;
+		public TextBox rarityBox;
+		public Utils.Card card;
 
-	private void FilterCards(string filter)
-	{
-		List<TextBlock> items = [];
-		foreach(Utils.Card card in Program.allCards)
+		public PackCardPanel(Utils.Card card, string[] rarities, Image hoveredImageBox)
 		{
-			if(card.name.Contains(filter, StringComparison.CurrentCultureIgnoreCase) ||
-				card.desc.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
+			Orientation = Orientation.Horizontal;
+			this.card = card;
+			nameBlock = new()
 			{
-				TextBlock block = new()
-				{
-					DataContext = card,
-					Text = card.name
-				};
-				block.PointerEntered += ShowCard;
-				items.Add(block);
-			}
+				Text = card.name
+			};
+			nameBlock.PointerEntered += (_, _) => ShowCard(hoveredImageBox, card);
+			Children.Add(nameBlock);
+			rarityBox = new()
+			{
+				Watermark = "Rarity",
+				Text = card.rarityIndex < rarities.Length ? rarities[card.rarityIndex] : null
+			};
+			Children.Add(rarityBox);
 		}
-		allCardsBox.ItemsSource = items;
 	}
-
-	private void ShowCard(object? sender, PointerEventArgs e)
+	private static void ShowCard(Image hoveredImageBox, Utils.Card card)
 	{
-		if(sender == null)
-		{
-			return;
-		}
-		Utils.Card card = (Utils.Card)((Control)sender).DataContext!;
-		// hoveredTextBox.Text = card.desc;
 		foreach(string ending in Utils.ENDINGS)
 		{
 			string imagePathText = Path.Combine(Program.config.image_path, $"{card.id}{ending}");
@@ -163,6 +156,34 @@ public partial class CreatePackWindow : Window
 			});
 		}
 	}
+
+	public CreatePackWindow()
+	{
+		InitializeComponent();
+		FilterCards("");
+	}
+
+	private void FilterCards(string filter)
+	{
+		List<TextBlock> items = [];
+		foreach(Utils.Card card in Program.allCards)
+		{
+			if(card.name.Contains(filter, StringComparison.CurrentCultureIgnoreCase) ||
+				card.desc.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
+			{
+				TextBlock block = new()
+				{
+					DataContext = card,
+					Text = card.name,
+				};
+				block.PointerEntered += (_, _) => ShowCard(hoveredImageBox, card);
+				items.Add(block);
+			}
+		}
+		allCardsBox.ItemsSource = items;
+	}
+
+
 
 	public void BackClick(object? sender, RoutedEventArgs args)
 	{
@@ -200,19 +221,17 @@ public partial class CreatePackWindow : Window
 			return;
 		}
 		Utils.Pack pack = JsonSerializer.Deserialize<Utils.Pack>(File.ReadAllBytes(path), Utils.jsonIncludeOption)!;
-		packBox.Items.Clear();
-		foreach(Utils.Card card in pack.cards)
-		{
-			packBox.Items.Add(new TextBlock
-			{
-				Text = card.name,
-				DataContext = card,
-			});
-		}
+		raritiesPanel.Items.Clear();
 		foreach(string rarity in pack.rarities)
 		{
 			AddRarity(rarity);
 		}
+		packBox.Items.Clear();
+		foreach(Utils.Card card in pack.cards)
+		{
+			packBox.Items.Add(new PackCardPanel(card, pack.rarities, hoveredImageBox));
+		}
+		packLayoutPanel.Items.Clear();
 		foreach(Utils.Slot slot in pack.slots)
 		{
 			AddLayoutSlot(primaryRarityIndex: slot.primaryRarityIndex, secondaryRarityIndex: slot.secondaryRarityIndex, secondaryFrequency: slot.secondaryRarityFrequency);
@@ -232,17 +251,19 @@ public partial class CreatePackWindow : Window
 		{
 			return;
 		}
-		Utils.Card[] cards = new Utils.Card[packBox.ItemCount];
-		for(int i = 0; i < packBox.ItemCount; i++)
-		{
-			cards[i] = (Utils.Card)((Control)packBox.ItemsView[i]!).DataContext!;
-		}
 		string[] rarities = new string[raritiesPanel.ItemCount];
 		Dictionary<string, int> rarityIndices = [];
 		for(int i = 0; i < rarities.Length; i++)
 		{
 			rarities[i] = ((RarityPanel)raritiesPanel.Items[i]!).nameBox.Text!;
 			rarityIndices[rarities[i]] = i;
+		}
+		Utils.Card[] cards = new Utils.Card[packBox.ItemCount];
+		for(int i = 0; i < packBox.ItemCount; i++)
+		{
+			PackCardPanel p = (PackCardPanel)packBox.Items[i]!;
+			p.card.rarityIndex = p.rarityBox.Text == null ? 0 : rarityIndices.GetValueOrDefault(p.rarityBox.Text, 0);
+			cards[i] = p.card;
 		}
 		Utils.Slot[] slots = new Utils.Slot[packLayoutPanel.ItemCount];
 		for(int i = 0; i < slots.Length; i++)
@@ -273,11 +294,7 @@ public partial class CreatePackWindow : Window
 				return;
 			}
 		}
-		packBox.Items.Add(new TextBlock
-		{
-			Text = block.Text,
-			DataContext = block.DataContext,
-		});
+		packBox.Items.Add(new PackCardPanel((Utils.Card)block.DataContext!, [], hoveredImageBox));
 	}
 
 	public void PackSelectionChanged(object? sender, SelectionChangedEventArgs args)
