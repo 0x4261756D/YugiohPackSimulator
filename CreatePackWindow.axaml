@@ -9,8 +9,8 @@
 			RowDefinitions="Auto,Auto,*">
 		<Button Grid.Column="0" Grid.Row="0" Click="BackClick">Back</Button>
 		<TextBox Grid.Column="1" Grid.Row="0" KeyUp="InputKeyUp"/>
-		<ListBox Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" x:Name="allCardsBox" SelectionChanged="AllCardsSelectionChanged"/>
-		<ListBox Grid.Column="2" Grid.Row="1" Grid.RowSpan="2" x:Name="packBox" SelectionChanged="PackSelectionChanged"/>
+		<ListBox Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" ScrollViewer.HorizontalScrollBarVisibility="Auto" x:Name="allCardsBox" SelectionChanged="AllCardsSelectionChanged"/>
+		<ListBox Grid.Column="2" Grid.Row="1" Grid.RowSpan="2" ScrollViewer.HorizontalScrollBarVisibility="Auto" x:Name="packBox" AutoScrollToSelectedItem="True"/>
 		<Image Grid.Column="3" Grid.Row="0" Grid.RowSpan="3" x:Name="hoveredImageBox"/>
 		<Button Grid.Column="4" Grid.Row="0" Click="SaveClick">Save</Button>
 		<ListBox Grid.Column="4" Grid.Row="1" x:Name="raritiesPanel"/>

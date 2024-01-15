@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -13,6 +14,7 @@ public partial class SimulationWindow : Window
 	private readonly List<Utils.Card>[] cardpoolByRarity;
 	private readonly Utils.Pack pack;
 	private readonly List<Utils.Card> cards;
+	private readonly ReadOnlyDictionary<string, int> rarityIndices;
 	private readonly int[] rarityProgresses;
 	private readonly Random random;
 	public SimulationWindow(Utils.Pack pack, int amount)
@@ -24,14 +26,21 @@ public partial class SimulationWindow : Window
 		cards = [];
 		rarityProgresses = new int[pack.rarities.Length];
 		cardpoolByRarity = new List<Utils.Card>[pack.rarities.Length];
+		Dictionary<string, int> indices = [];
+		for(int i = 0; i < pack.rarities.Length; i++)
+		{
+			indices[pack.rarities[i]] = i;
+		}
+		rarityIndices = new(indices);
 		// TODO: Calculate the value, don't just guess
 		int multiplicity = 3;
 		for(int i = 0; i < pack.cards.Length; i++)
 		{
-			cardpoolByRarity[pack.cards[i].rarityIndex] ??= [];
+			int rarityIndex = rarityIndices[(pack.cards[i].rarity ?? pack.defaultRarity) ?? ""];
+			cardpoolByRarity[rarityIndex] ??= [];
 			for(int j = 0; j < multiplicity; j++)
 			{
-				cardpoolByRarity[pack.cards[i].rarityIndex].Insert(random.Next(cardpoolByRarity[pack.cards[i].rarityIndex].Count), pack.cards[i]);
+				cardpoolByRarity[rarityIndex].Insert(random.Next(cardpoolByRarity[rarityIndex].Count), pack.cards[i]);
 			}
 		}
 		SimulateNextPack();
@@ -55,15 +64,15 @@ public partial class SimulationWindow : Window
 		packPanel.Children.Clear();
 		foreach(Utils.Slot slot in pack.slots)
 		{
-			Utils.Card card = cardpoolByRarity[slot.primaryRarityIndex][rarityProgresses[slot.primaryRarityIndex]];
+			Utils.Card card = cardpoolByRarity[rarityIndices[slot.primaryRarity]][rarityProgresses[rarityIndices[slot.primaryRarity]]];
 			if(random.Next(slot.secondaryRarityFrequency) == 1)
 			{
-				card = cardpoolByRarity[slot.secondaryRarityIndex][rarityProgresses[slot.secondaryRarityIndex]];
-				rarityProgresses[slot.secondaryRarityIndex] += 1;
+				card = cardpoolByRarity[rarityIndices[slot.secondaryRarity]][rarityProgresses[rarityIndices[slot.secondaryRarity]]];
+				rarityProgresses[rarityIndices[slot.secondaryRarity]] += 1;
 			}
 			else
 			{
-				rarityProgresses[slot.primaryRarityIndex] += 1;
+				rarityProgresses[rarityIndices[slot.primaryRarity]] += 1;
 			}
 			Panel panel = new()
 			{

@@ -34,19 +34,19 @@ public class Utils
 		public int id = id;
 		public string name = name;
 		public string desc = desc;
-		public int rarityIndex;
+		public string? rarity = null;
 	}
-	public class Pack(Card[] cards, string[] rarities, Slot[] slots)
+	public class Pack(Card[] cards, string[] rarities, Slot[] slots, string? defaultRarity)
 	{
 		public Card[] cards = cards;
 		public string[] rarities = rarities;
 		public Slot[] slots = slots;
+		public string? defaultRarity = defaultRarity;
 	}
-
-	public class Slot(int primaryRarityIndex, int secondaryRarityIndex, int secondaryRarityFrequency)
+	public class Slot(string primaryRarity, string secondaryRarity, int secondaryRarityFrequency)
 	{
-		public int primaryRarityIndex = primaryRarityIndex;
-		public int secondaryRarityIndex = secondaryRarityIndex;
+		public string primaryRarity = primaryRarity;
+		public string secondaryRarity = secondaryRarity;
 		public int secondaryRarityFrequency = secondaryRarityFrequency;
 	}
 

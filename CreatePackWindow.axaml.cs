@@ -17,25 +17,25 @@ public partial class CreatePackWindow : Window
 		public NumericUpDown secondaryFrequencyBox;
 		public Button removeButton;
 
-		public LayoutSlotPanel(ListBox raritiesPanel, int primaryRarityIndex, int secondaryRarityIndex, int secondaryFrequency)
+		public LayoutSlotPanel(ListBox raritiesPanel, string? primaryRarity, string? secondaryRarity, int secondaryFrequency)
 		{
 			Orientation = Orientation.Horizontal;
-			string[] rarities = new string[raritiesPanel.ItemCount];
+			string?[] rarities = new string?[raritiesPanel.ItemCount];
 			for(int i = 0; i < rarities.Length; i++)
 			{
-				Control c = (Control)raritiesPanel.Items[i]!;
-				rarities[i] = ((TextBox)((StackPanel)c).Children[0]).Text!;
+				RarityPanel c = (RarityPanel)raritiesPanel.Items[i]!;
+				rarities[i] = c.nameBox.Text;
 			}
 			primaryRarityBox = new()
 			{
 				ItemsSource = rarities,
-				SelectedIndex = primaryRarityIndex,
+				SelectedItem = primaryRarity,
 			};
 			Children.Add(primaryRarityBox);
 			secondaryRarityBox = new()
 			{
 				ItemsSource = rarities,
-				SelectedIndex = secondaryRarityIndex,
+				SelectedItem = secondaryRarity,
 			};
 			Children.Add(secondaryRarityBox);
 			secondaryFrequencyBox = new()
@@ -61,10 +61,18 @@ public partial class CreatePackWindow : Window
 	{
 		public TextBox nameBox;
 		public Button removeButton;
+		public RadioButton isDefaultButton;
 
-		public RarityPanel(string text, ListBox packLayoutPanel)
+		public RarityPanel(string text, ListBox packLayoutPanel, bool isDefaultRarity)
 		{
 			Orientation = Orientation.Horizontal;
+			isDefaultButton = new()
+			{
+				Content = "Default",
+				GroupName = "isDefaultRarity",
+				IsChecked = isDefaultRarity,
+			};
+			Children.Add(isDefaultButton);
 			nameBox = new()
 			{
 				Watermark = "Name",
@@ -101,8 +109,9 @@ public partial class CreatePackWindow : Window
 		public TextBlock nameBlock;
 		public TextBox rarityBox;
 		public Utils.Card card;
+		public Button removeButton;
 
-		public PackCardPanel(Utils.Card card, string[] rarities, Image hoveredImageBox)
+		public PackCardPanel(Utils.Card card, Image hoveredImageBox, string? defaultRarity)
 		{
 			Orientation = Orientation.Horizontal;
 			this.card = card;
@@ -115,9 +124,18 @@ public partial class CreatePackWindow : Window
 			rarityBox = new()
 			{
 				Watermark = "Rarity",
-				Text = card.rarityIndex < rarities.Length ? rarities[card.rarityIndex] : null
+				Text = card.rarity ?? defaultRarity
 			};
 			Children.Add(rarityBox);
+			removeButton = new()
+			{
+				Content = "-"
+			};
+			removeButton.Click += (_, _) =>
+			{
+				((ListBox)Parent!).Items.Remove(this);
+			};
+			Children.Add(removeButton);
 		}
 	}
 
@@ -157,24 +175,54 @@ public partial class CreatePackWindow : Window
 
 	public void AddRarityClick(object? sender, RoutedEventArgs args)
 	{
-		AddRarity("");
+		AddRarity("", isDefaultRarity: false, append: false);
 	}
-	private void AddRarity(string text)
+	private void AddRarity(string text, bool isDefaultRarity, bool append)
 	{
-		raritiesPanel.Items.Insert(0, new RarityPanel(text, packLayoutPanel));
+		RarityPanel panel = new(text, packLayoutPanel, isDefaultRarity);
+		if(append)
+		{
+			raritiesPanel.Items.Add(panel);
+		}
+		else
+		{
+			raritiesPanel.Items.Insert(0, panel);
+		}
 	}
 
 	public void AddLayoutSlotClick(object? sender, RoutedEventArgs args)
 	{
-		AddLayoutSlot(0, 0, 0);
+		AddLayoutSlot(null, null, 0, GetDefaultRarity(), append: false);
 	}
-	public void AddLayoutSlot(int primaryRarityIndex, int secondaryRarityIndex, int secondaryFrequency)
+
+	private string? GetDefaultRarity()
+	{
+		foreach(object? c in raritiesPanel.Items)
+		{
+			RarityPanel? p = (RarityPanel?)c;
+			if(p != null && (p.isDefaultButton.IsChecked ?? false))
+			{
+				return p.nameBox.Text;
+			}
+		}
+		return null;
+	}
+
+	public void AddLayoutSlot(string? primaryRarity, string? secondaryRarity, int secondaryFrequency, string? defaultRarity, bool append)
 	{
 		if(raritiesPanel.ItemCount == 0)
 		{
 			return;
 		}
-		packLayoutPanel.Items.Insert(0, new LayoutSlotPanel(raritiesPanel, primaryRarityIndex: primaryRarityIndex, secondaryFrequency: secondaryFrequency, secondaryRarityIndex: secondaryRarityIndex));
+		LayoutSlotPanel panel = new(raritiesPanel, primaryRarity: primaryRarity ?? defaultRarity, secondaryFrequency: secondaryFrequency, secondaryRarity: secondaryRarity ?? defaultRarity);
+		if(append)
+		{
+			packLayoutPanel.Items.Add(panel);
+		}
+		else
+		{
+			packLayoutPanel.Items.Insert(0, panel);
+		}
 	}
 
 	public async void LoadClick(object? sender, RoutedEventArgs args)
@@ -188,17 +236,17 @@ public partial class CreatePackWindow : Window
 		raritiesPanel.Items.Clear();
 		foreach(string rarity in pack.rarities)
 		{
-			AddRarity(rarity);
+			AddRarity(append: true, text: rarity, isDefaultRarity: rarity == pack.defaultRarity);
 		}
 		packBox.Items.Clear();
 		foreach(Utils.Card card in pack.cards)
 		{
-			packBox.Items.Add(new PackCardPanel(card, pack.rarities, hoveredImageBox));
+			packBox.Items.Add(new PackCardPanel(card, hoveredImageBox, defaultRarity: pack.defaultRarity));
 		}
 		packLayoutPanel.Items.Clear();
 		foreach(Utils.Slot slot in pack.slots)
 		{
-			AddLayoutSlot(primaryRarityIndex: slot.primaryRarityIndex, secondaryRarityIndex: slot.secondaryRarityIndex, secondaryFrequency: slot.secondaryRarityFrequency);
+			AddLayoutSlot(append: true, primaryRarity: slot.primaryRarity, secondaryRarity: slot.secondaryRarity, secondaryFrequency: slot.secondaryRarityFrequency, defaultRarity: pack.defaultRarity);
 		}
 	}
 	public async void SaveClick(object? sender, RoutedEventArgs args)
@@ -216,17 +264,21 @@ public partial class CreatePackWindow : Window
 			return;
 		}
 		string[] rarities = new string[raritiesPanel.ItemCount];
-		Dictionary<string, int> rarityIndices = [];
+		string? defaultRarity = null;
 		for(int i = 0; i < rarities.Length; i++)
 		{
-			rarities[i] = ((RarityPanel)raritiesPanel.Items[i]!).nameBox.Text!;
-			rarityIndices[rarities[i]] = i;
+			RarityPanel panel = (RarityPanel)raritiesPanel.Items[i]!;
+			rarities[i] = panel.nameBox.Text!;
+			if(panel.isDefaultButton.IsChecked ?? false)
+			{
+				defaultRarity = rarities[i];
+			}
 		}
 		Utils.Card[] cards = new Utils.Card[packBox.ItemCount];
 		for(int i = 0; i < packBox.ItemCount; i++)
 		{
 			PackCardPanel p = (PackCardPanel)packBox.Items[i]!;
-			p.card.rarityIndex = p.rarityBox.Text == null ? 0 : rarityIndices.GetValueOrDefault(p.rarityBox.Text, 0);
+			p.card.rarity = p.rarityBox.Text ?? defaultRarity;
 			cards[i] = p.card;
 		}
 		Utils.Slot[] slots = new Utils.Slot[packLayoutPanel.ItemCount];
@@ -234,11 +286,11 @@ public partial class CreatePackWindow : Window
 		{
 			LayoutSlotPanel p = (LayoutSlotPanel)packLayoutPanel.Items[i]!;
 			slots[i] = new(
-				primaryRarityIndex: rarityIndices[(string)p.primaryRarityBox.SelectedValue!],
-				secondaryRarityIndex: rarityIndices[(string)p.secondaryRarityBox.SelectedValue!],
+				primaryRarity: (string)p.primaryRarityBox.SelectedValue!,
+				secondaryRarity: (string)p.secondaryRarityBox.SelectedValue!,
 				secondaryRarityFrequency: (int)p.secondaryFrequencyBox.Value!);
 		}
-		Utils.Pack pack = new(cards: cards, rarities: rarities, slots: slots);
+		Utils.Pack pack = new(cards: cards, rarities: rarities, slots: slots, defaultRarity: defaultRarity);
 		await Utils.SaveFileAtSelectedLocationAsync(JsonSerializer.SerializeToUtf8Bytes(pack, Utils.jsonPrettyOption), this, defaultExtension: "json");
 	}
 
@@ -258,21 +310,9 @@ public partial class CreatePackWindow : Window
 				return;
 			}
 		}
-		packBox.Items.Add(new PackCardPanel((Utils.Card)block.DataContext!, [], hoveredImageBox));
+		packBox.Items.Add(new PackCardPanel((Utils.Card)block.DataContext!, hoveredImageBox, defaultRarity: GetDefaultRarity()));
+		packBox.SelectedIndex = packBox.ItemCount - 1;
 	}
-
-	public void PackSelectionChanged(object? sender, SelectionChangedEventArgs args)
-	{
-		if(args.AddedItems.Count != 1 || args.RemovedItems.Count != 0)
-		{
-			return;
-		}
-		args.Handled = true;
-		TextBlock block = (TextBlock)args.AddedItems[0]!;
-		packBox.SelectedItem = null;
-		packBox.Items.Remove(block);
-	}
-
 	public void InputKeyUp(object? sender, KeyEventArgs args)
 	{
 		if(sender == null)
