@@ -137,9 +137,9 @@ public partial class SimulationWindow : Window
 			StringBuilder builder = new();
 			foreach(Utils.Card card in cards)
 			{
-				builder.Append($"{card.id}\n");
+				_ = builder.Append($"{card.id}\n");
 			}
-			await Utils.SaveFileAtSelectedLocationAsync(Encoding.UTF8.GetBytes(builder.ToString()), this, defaultExtension: "ydk");
+			await Utils.SaveFileAtSelectedLocationAsync(Encoding.UTF8.GetBytes(builder.ToString()), this, defaultExtension: "ydk").ConfigureAwait(true);
 			new MainWindow().Show();
 			Close();
 		}

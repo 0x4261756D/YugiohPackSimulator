@@ -19,7 +19,7 @@ public partial class ConfigSimulationWindow : Window
 	}
 	public async void SelectPackClick(object? sender, RoutedEventArgs args)
 	{
-		pathBox.Text = await Utils.SelectFileAsync(this);
+		pathBox.Text = await Utils.SelectFileAsync(this).ConfigureAwait(true);
 	}
 	public void StartClick(object? sender, RoutedEventArgs args)
 	{

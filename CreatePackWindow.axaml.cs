@@ -52,7 +52,7 @@ public partial class CreatePackWindow : Window
 			};
 			removeButton.Click += (_, _) =>
 			{
-				((Panel)Parent!).Children.Remove(this);
+				_ = ((Panel)Parent!).Children.Remove(this);
 			};
 			Children.Add(removeButton);
 		}
@@ -85,7 +85,7 @@ public partial class CreatePackWindow : Window
 			};
 			removeButton.Click += (_, _) =>
 			{
-				((ListBox)Parent!).Items.Remove(this);
+				_ = ((ListBox)Parent!).Items.Remove(this);
 				for(int i = packLayoutPanel.ItemCount - 1; i >= 0; i--)
 				{
 					LayoutSlotPanel layoutSlot = (LayoutSlotPanel)packLayoutPanel.Items[i]!;
@@ -133,7 +133,7 @@ public partial class CreatePackWindow : Window
 			};
 			removeButton.Click += (_, _) =>
 			{
-				((ListBox)Parent!).Items.Remove(this);
+				_ = ((ListBox)Parent!).Items.Remove(this);
 			};
 			Children.Add(removeButton);
 		}
@@ -182,7 +182,7 @@ public partial class CreatePackWindow : Window
 		RarityPanel panel = new(text, packLayoutPanel, isDefaultRarity);
 		if(append)
 		{
-			raritiesPanel.Items.Add(panel);
+			_ = raritiesPanel.Items.Add(panel);
 		}
 		else
 		{
@@ -217,7 +217,7 @@ public partial class CreatePackWindow : Window
 		LayoutSlotPanel panel = new(raritiesPanel, primaryRarity: primaryRarity ?? defaultRarity, secondaryFrequency: secondaryFrequency, secondaryRarity: secondaryRarity ?? defaultRarity);
 		if(append)
 		{
-			packLayoutPanel.Items.Add(panel);
+			_ = packLayoutPanel.Items.Add(panel);
 		}
 		else
 		{
@@ -227,7 +227,7 @@ public partial class CreatePackWindow : Window
 
 	public async void LoadClick(object? sender, RoutedEventArgs args)
 	{
-		string? path = await Utils.SelectFileAsync(this);
+		string? path = await Utils.SelectFileAsync(this).ConfigureAwait(true);
 		if(path == null || !File.Exists(path))
 		{
 			return;
@@ -241,7 +241,7 @@ public partial class CreatePackWindow : Window
 		packBox.Items.Clear();
 		foreach(Utils.Card card in pack.cards)
 		{
-			packBox.Items.Add(new PackCardPanel(card, hoveredImageBox, defaultRarity: pack.defaultRarity));
+			_ = packBox.Items.Add(new PackCardPanel(card, hoveredImageBox, defaultRarity: pack.defaultRarity));
 		}
 		packLayoutPanel.Items.Clear();
 		foreach(Utils.Slot slot in pack.slots)
@@ -291,7 +291,7 @@ public partial class CreatePackWindow : Window
 				secondaryRarityFrequency: (int)p.secondaryFrequencyBox.Value!);
 		}
 		Utils.Pack pack = new(cards: cards, rarities: rarities, slots: slots, defaultRarity: defaultRarity);
-		await Utils.SaveFileAtSelectedLocationAsync(JsonSerializer.SerializeToUtf8Bytes(pack, Utils.jsonPrettyOption), this, defaultExtension: "json");
+		await Utils.SaveFileAtSelectedLocationAsync(JsonSerializer.SerializeToUtf8Bytes(pack, Utils.jsonPrettyOption), this, defaultExtension: "json").ConfigureAwait(false);
 	}
 
 	public void AllCardsSelectionChanged(object? sender, SelectionChangedEventArgs args)
@@ -310,7 +310,7 @@ public partial class CreatePackWindow : Window
 				return;
 			}
 		}
-		packBox.Items.Add(new PackCardPanel((Utils.Card)block.DataContext!, hoveredImageBox, defaultRarity: GetDefaultRarity()));
+		_ = packBox.Items.Add(new PackCardPanel((Utils.Card)block.DataContext!, hoveredImageBox, defaultRarity: GetDefaultRarity()));
 		packBox.SelectedIndex = packBox.ItemCount - 1;
 	}
 	public void InputKeyUp(object? sender, KeyEventArgs args)

@@ -34,7 +34,7 @@ public class Utils
 		public int id = id;
 		public string name = name;
 		public string desc = desc;
-		public string? rarity = null;
+		public string? rarity;
 	}
 	public class Pack(Card[] cards, string[] rarities, Slot[] slots, string? defaultRarity)
 	{
@@ -53,12 +53,15 @@ public class Utils
 	public static async Task<string?> SelectFileAsync(Window window, string title = "Select file", bool allowMultiple = false)
 	{
 		TopLevel? topLevel = TopLevel.GetTopLevel(window);
-		if(topLevel == null) return null;
+		if(topLevel == null)
+		{
+			return null;
+		}
 		IReadOnlyList<IStorageFile> files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
 		{
 			Title = title,
 			AllowMultiple = allowMultiple,
-		});
+		}).ConfigureAwait(false);
 		if(files.Count > 0)
 		{
 			return files[0].Path.AbsolutePath;
@@ -69,23 +72,26 @@ public class Utils
 	public static async Task SaveFileAtSelectedLocationAsync(byte[] content, Window window, string defaultExtension, string title = "Select file")
 	{
 		TopLevel? topLevel = TopLevel.GetTopLevel(window);
-		if(topLevel == null) return;
+		if(topLevel == null)
+		{
+			return;
+		}
 		IStorageFile? file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
 		{
 			DefaultExtension = defaultExtension,
 			ShowOverwritePrompt = true,
 			Title = title
-		});
+		}).ConfigureAwait(false);
 		if(file == null)
 		{
 			return;
 		}
-		using Stream stream = await file.OpenWriteAsync();
-		await stream.WriteAsync(buffer: content);
+		using Stream stream = await file.OpenWriteAsync().ConfigureAwait(true);
+		await stream.WriteAsync(buffer: content).ConfigureAwait(true);
 	}
-	public static void ShowCard(Image hoveredImageBox, Utils.Card card)
+	public static void ShowCard(Image hoveredImageBox, Card card)
 	{
-		foreach(string ending in Utils.ENDINGS)
+		foreach(string ending in ENDINGS)
 		{
 			string imagePathText = Path.Combine(Program.config.image_path, $"{card.id}{ending}");
 			if(File.Exists(imagePathText))
@@ -94,21 +100,21 @@ public class Utils
 				return;
 			}
 		}
-		foreach(string ending in Utils.ENDINGS)
+		foreach(string ending in ENDINGS)
 		{
 			string imagePathText = Path.Combine(Program.config.image_path, $"{card.id}{ending}");
 			hoveredImageBox.Source = null;
-			Task.Run(async () =>
+			_ = Task.Run(async () =>
 			{
 				using HttpClient client = new();
 				foreach(string baseUrl in Program.config.image_urls)
 				{
 					string url = $"{baseUrl}{card.id}{ending}";
-					HttpResponseMessage response = await client.GetAsync(url);
+					HttpResponseMessage response = await client.GetAsync(url).ConfigureAwait(true);
 					if(response.StatusCode == HttpStatusCode.OK)
 					{
-						await File.WriteAllBytesAsync(imagePathText, await response.Content.ReadAsByteArrayAsync());
-						await Dispatcher.UIThread.InvokeAsync(() => hoveredImageBox.Source = new Bitmap(imagePathText));
+						await File.WriteAllBytesAsync(imagePathText, await response.Content.ReadAsByteArrayAsync().ConfigureAwait(true)).ConfigureAwait(true);
+						_ = await Dispatcher.UIThread.InvokeAsync(() => hoveredImageBox.Source = new Bitmap(imagePathText));
 					}
 				}
 			});

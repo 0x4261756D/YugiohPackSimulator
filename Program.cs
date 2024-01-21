@@ -31,16 +31,19 @@ class Program
 		{
 			config.database_root_path = "";
 		}
-		PopulateDatabaseList(config.database_root_path);
+		else
+		{
+			PopulateDatabaseList(config.database_root_path);
+		}
 		if(!Directory.Exists(config.image_path))
 		{
-			Directory.CreateDirectory(config!.image_path);
+			_ = Directory.CreateDirectory(config!.image_path);
 		}
 
-		BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+		_ = BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
 	}
 
-	private static void PopulateDatabaseList(string path)
+	public static void PopulateDatabaseList(string path)
 	{
 		foreach(string fileText in Directory.GetFiles(path))
 		{
