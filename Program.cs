@@ -29,7 +29,7 @@ class Program
 		}
 		if(!Directory.Exists(config.database_root_path))
 		{
-			throw new Exception($"Database root path {Path.GetFullPath(config!.database_root_path)} does not exist");
+			config.database_root_path = "";
 		}
 		PopulateDatabaseList(config.database_root_path);
 		if(!Directory.Exists(config.image_path))
