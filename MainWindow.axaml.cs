@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Avalonia.Controls;
@@ -20,7 +21,7 @@ public partial class MainWindow : Window
 	{
 		Program.config!.database_root_path = databaseRootPathBox.Text ?? "";
 		Program.config!.image_path = imagePathBox.Text ?? "";
-		Program.config!.image_urls = new List<string>((imageUrlBox.Text ?? "").Split('\n'));
+		Program.config!.image_urls = new List<string>((imageUrlBox.Text ?? "").Split(Environment.NewLine));
 	}
 
 	public void ToCreatePackClick(object? sender, RoutedEventArgs args)
