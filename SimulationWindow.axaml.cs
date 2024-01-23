@@ -17,7 +17,7 @@ public partial class SimulationWindow : Window
 	private readonly ReadOnlyDictionary<string, int> rarityIndices;
 	private readonly int[] rarityProgresses;
 	private readonly Random random;
-	public SimulationWindow(Utils.Pack pack, int amount)
+	public SimulationWindow(Utils.Pack pack, ReadOnlyDictionary<string, int> rarityIndices, List<Utils.Card>[] cardpoolByRarity, int amount)
 	{
 		InitializeComponent();
 		this.pack = pack;
@@ -25,24 +25,8 @@ public partial class SimulationWindow : Window
 		random = new Random();
 		cards = [];
 		rarityProgresses = new int[pack.rarities.Length];
-		cardpoolByRarity = new List<Utils.Card>[pack.rarities.Length];
-		Dictionary<string, int> indices = [];
-		for(int i = 0; i < pack.rarities.Length; i++)
-		{
-			indices[pack.rarities[i]] = i;
-		}
-		rarityIndices = new(indices);
-		// TODO: Calculate the value, don't just guess
-		int multiplicity = 3;
-		for(int i = 0; i < pack.cards.Length; i++)
-		{
-			int rarityIndex = rarityIndices[(pack.cards[i].rarity ?? pack.defaultRarity) ?? ""];
-			cardpoolByRarity[rarityIndex] ??= [];
-			for(int j = 0; j < multiplicity; j++)
-			{
-				cardpoolByRarity[rarityIndex].Insert(random.Next(cardpoolByRarity[rarityIndex].Count), pack.cards[i]);
-			}
-		}
+		this.rarityIndices = rarityIndices;
+		this.cardpoolByRarity = cardpoolByRarity;
 		SimulateNextPack();
 		LayoutUpdated += InitializeSizes;
 	}
