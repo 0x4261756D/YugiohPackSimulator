@@ -79,6 +79,10 @@ public partial class SimulationWindow : Window
 				};
 				panel.Children.Add(img);
 				Utils.ShowCard(img, card);
+				panel.Children.Add(new TextBlock
+				{
+					Text = $"{card.rarity}{(img.Source is null ? "\n" + card.name : "")}"
+				});
 			};
 			panel.Children.Add(button);
 			packPanel.Children.Add(panel);
