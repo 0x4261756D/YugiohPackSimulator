@@ -52,7 +52,7 @@ public partial class CreatePackWindow : Window
 			};
 			removeButton.Click += (_, _) =>
 			{
-				_ = ((Panel)Parent!).Children.Remove(this);
+				_ = ((ListBox)Parent!).Items.Remove(this);
 			};
 			Children.Add(removeButton);
 		}
