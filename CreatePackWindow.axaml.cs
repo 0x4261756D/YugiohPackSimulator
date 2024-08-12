@@ -116,9 +116,9 @@ public partial class CreatePackWindow : Window
 				_ = ((ListBox)Parent!).Items.Remove(this);
 				for(int i = packLayoutPanel.ItemCount - 1; i >= 0; i--)
 				{
-					LayoutSlotPanel layoutSlot = (LayoutSlotPanel)packLayoutPanel.Items[i]!;
-					string primaryRarity = (string)layoutSlot.primaryRarityBox.SelectedValue!;
-					string secondaryRarity = (string)layoutSlot.secondaryRarityBox.SelectedValue!;
+					LayoutSlotPanel? layoutSlot = (LayoutSlotPanel?)packLayoutPanel.Items[i];
+					string? primaryRarity = (string?)layoutSlot?.primaryRarityBox.SelectedValue;
+					string? secondaryRarity = (string?)layoutSlot?.secondaryRarityBox.SelectedValue;
 					if(primaryRarity == nameBox.Text)
 					{
 						packLayoutPanel.Items.RemoveAt(i);
@@ -334,9 +334,9 @@ public partial class CreatePackWindow : Window
 		{
 			LayoutSlotPanel p = (LayoutSlotPanel)packLayoutPanel.Items[i]!;
 			slots[i] = new(
-				primaryRarity: (string)p.primaryRarityBox.SelectedValue!,
-				secondaryRarity: (string)p.secondaryRarityBox.SelectedValue!,
-				secondaryRarityFrequency: (int)p.secondaryFrequencyBox.Value!);
+				primaryRarity: ((string?)p.primaryRarityBox.SelectedValue) ?? defaultRarity,
+				secondaryRarity: ((string?)p.secondaryRarityBox.SelectedValue) ?? defaultRarity,
+				secondaryRarityFrequency: (int?)p.secondaryFrequencyBox.Value ?? 0);
 		}
 		Utils.Pack pack = new(cards: cards, rarities: rarities, slots: slots, defaultRarity: defaultRarity);
 		await Utils.SaveFileAtSelectedLocationAsync(JsonSerializer.SerializeToUtf8Bytes(pack, Utils.jsonPrettyOption), this, defaultExtension: "json").ConfigureAwait(false);

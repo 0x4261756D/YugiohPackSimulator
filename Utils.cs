@@ -43,10 +43,10 @@ public class Utils
 		public Slot[] slots = slots;
 		public string? defaultRarity = defaultRarity;
 	}
-	public class Slot(string primaryRarity, string secondaryRarity, int secondaryRarityFrequency)
+	public class Slot(string? primaryRarity, string? secondaryRarity, int secondaryRarityFrequency)
 	{
-		public string primaryRarity = primaryRarity;
-		public string secondaryRarity = secondaryRarity;
+		public string? primaryRarity = primaryRarity;
+		public string? secondaryRarity = secondaryRarity;
 		public int secondaryRarityFrequency = secondaryRarityFrequency;
 	}
 

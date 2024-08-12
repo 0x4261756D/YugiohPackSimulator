@@ -48,15 +48,17 @@ public partial class SimulationWindow : Window
 		packPanel.Children.Clear();
 		foreach(Utils.Slot slot in pack.slots)
 		{
-			Utils.Card card = cardpoolByRarity[rarityIndices[slot.primaryRarity]][rarityProgresses[rarityIndices[slot.primaryRarity]]];
+			string primaryRarity = slot.primaryRarity ?? pack.defaultRarity!;
+			Utils.Card card = cardpoolByRarity[rarityIndices[primaryRarity]][rarityProgresses[rarityIndices[primaryRarity]]];
 			if(random.Next(slot.secondaryRarityFrequency) == 1)
 			{
-				card = cardpoolByRarity[rarityIndices[slot.secondaryRarity]][rarityProgresses[rarityIndices[slot.secondaryRarity]]];
-				rarityProgresses[rarityIndices[slot.secondaryRarity]] += 1;
+				string secondaryRarity = slot.secondaryRarity ?? pack.defaultRarity!;
+				card = cardpoolByRarity[rarityIndices[secondaryRarity]][rarityProgresses[rarityIndices[secondaryRarity]]];
+				rarityProgresses[rarityIndices[secondaryRarity]] += 1;
 			}
 			else
 			{
-				rarityProgresses[rarityIndices[slot.primaryRarity]] += 1;
+				rarityProgresses[rarityIndices[primaryRarity]] += 1;
 			}
 			Panel panel = new()
 			{
