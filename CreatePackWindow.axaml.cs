@@ -31,11 +31,39 @@ public partial class CreatePackWindow : Window
 				ItemsSource = rarities,
 				SelectedItem = primaryRarity,
 			};
+			primaryRarityBox.DropDownOpened += (sender, _) =>
+			{
+				if(sender is null)
+				{
+					return;
+				}
+				string?[] rarities = new string?[raritiesPanel.ItemCount];
+				for(int i = 0; i < rarities.Length; i++)
+				{
+					RarityPanel c = (RarityPanel)raritiesPanel.Items[i]!;
+					rarities[i] = c.nameBox.Text;
+				}
+				((ComboBox)sender).ItemsSource = rarities;
+			};
 			Children.Add(primaryRarityBox);
 			secondaryRarityBox = new()
 			{
 				ItemsSource = rarities,
 				SelectedItem = secondaryRarity,
+			};
+			secondaryRarityBox.DropDownOpened += (sender, _) =>
+			{
+				if(sender is null)
+				{
+					return;
+				}
+				string?[] rarities = new string?[raritiesPanel.ItemCount];
+				for(int i = 0; i < rarities.Length; i++)
+				{
+					RarityPanel c = (RarityPanel)raritiesPanel.Items[i]!;
+					rarities[i] = c.nameBox.Text;
+				}
+				((ComboBox)sender).ItemsSource = rarities;
 			};
 			Children.Add(secondaryRarityBox);
 			secondaryFrequencyBox = new()
@@ -107,11 +135,11 @@ public partial class CreatePackWindow : Window
 	private class PackCardPanel : StackPanel
 	{
 		public TextBlock nameBlock;
-		public TextBox rarityBox;
+		public ComboBox rarityBox;
 		public Utils.Card card;
 		public Button removeButton;
 
-		public PackCardPanel(Utils.Card card, Image hoveredImageBox, string? defaultRarity)
+		public PackCardPanel(Utils.Card card, Image hoveredImageBox, string? defaultRarity, ListBox raritiesPanel)
 		{
 			Orientation = Orientation.Horizontal;
 			this.card = card;
@@ -121,10 +149,30 @@ public partial class CreatePackWindow : Window
 			};
 			nameBlock.PointerEntered += (_, _) => Utils.ShowCard(hoveredImageBox, card);
 			Children.Add(nameBlock);
+			string?[] rarities = new string?[raritiesPanel.ItemCount];
+			for(int i = 0; i < rarities.Length; i++)
+			{
+				RarityPanel c = (RarityPanel)raritiesPanel.Items[i]!;
+				rarities[i] = c.nameBox.Text;
+			}
 			rarityBox = new()
 			{
-				Watermark = "Rarity",
-				Text = card.rarity ?? defaultRarity
+				ItemsSource = rarities,
+				SelectedItem = card.rarity ?? defaultRarity
+			};
+			rarityBox.DropDownOpened += (sender, _) =>
+			{
+				if(sender is null)
+				{
+					return;
+				}
+				string?[] rarities = new string?[raritiesPanel.ItemCount];
+				for(int i = 0; i < rarities.Length; i++)
+				{
+					RarityPanel c = (RarityPanel)raritiesPanel.Items[i]!;
+					rarities[i] = c.nameBox.Text;
+				}
+				((ComboBox)sender).ItemsSource = rarities;
 			};
 			Children.Add(rarityBox);
 			removeButton = new()
@@ -241,7 +289,7 @@ public partial class CreatePackWindow : Window
 		packBox.Items.Clear();
 		foreach(Utils.Card card in pack.cards)
 		{
-			_ = packBox.Items.Add(new PackCardPanel(card, hoveredImageBox, defaultRarity: pack.defaultRarity));
+			_ = packBox.Items.Add(new PackCardPanel(card, hoveredImageBox, defaultRarity: pack.defaultRarity, raritiesPanel: raritiesPanel));
 		}
 		packLayoutPanel.Items.Clear();
 		foreach(Utils.Slot slot in pack.slots)
@@ -278,7 +326,7 @@ public partial class CreatePackWindow : Window
 		for(int i = 0; i < packBox.ItemCount; i++)
 		{
 			PackCardPanel p = (PackCardPanel)packBox.Items[i]!;
-			p.card.rarity = p.rarityBox.Text ?? defaultRarity;
+			p.card.rarity = ((string?)p.rarityBox.SelectedItem) ?? defaultRarity;
 			cards[i] = p.card;
 		}
 		Utils.Slot[] slots = new Utils.Slot[packLayoutPanel.ItemCount];
@@ -310,7 +358,7 @@ public partial class CreatePackWindow : Window
 				return;
 			}
 		}
-		_ = packBox.Items.Add(new PackCardPanel((Utils.Card)block.DataContext!, hoveredImageBox, defaultRarity: GetDefaultRarity()));
+		_ = packBox.Items.Add(new PackCardPanel((Utils.Card)block.DataContext!, hoveredImageBox, defaultRarity: GetDefaultRarity(), raritiesPanel: raritiesPanel));
 		packBox.SelectedIndex = packBox.ItemCount - 1;
 	}
 	public void InputKeyUp(object? sender, KeyEventArgs args)
