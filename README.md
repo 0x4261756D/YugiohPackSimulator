@@ -1,3 +1,5 @@
+**Moved to [Codeberg](https://codeberg.org/0x4261756D/YugiohPackSimulator)**
+
 # YugiohPackSimulator
 
 ## Images
